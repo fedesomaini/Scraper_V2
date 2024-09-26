@@ -5,9 +5,9 @@ from tkinter import filedialog, messagebox
 import os
 import sys
 from rapidfuzz import fuzz, process
-from clinicaltrials_Scraper import clinical_scraper
-from test_fda_scraper import fda_scraper
-from Epi_Scraper import run_epi_scraper
+from ClinicalTrials_Scraper_0926 import clinical_scraper
+from FDA_Scraper_0926 import fda_scraper
+from Epi_Scraper_0926 import run_epi_scraper
 
 class ScraperGUI:
     def __init__(self, master):
@@ -149,7 +149,7 @@ def run_main_scraper(condition, start_year, clinical_status, interventions, fda_
     print("The number of companies retrieved from FDA and CT scrapers is " + str(len(processed_companies_list)))
 
     # OBTAIN CIK CODES
-    cik_companies_path = r'C:\Users\DaneCallow\Desktop\BSPROJ\Scraper\Newest\cik_companies.csv'
+    cik_companies_path = r'C:\Users\DaneCallow\Documents\GitHub\Scraper_V2\cik_companies.csv'
     cik_df = pd.read_csv(cik_companies_path)
 
     # Standardize company names in cik_df
