@@ -4,15 +4,18 @@ from tkinter import ttk
 from tkinter import filedialog, messagebox
 import os
 import sys
+import subprocess
 from rapidfuzz import fuzz, process
 from ClinicalTrials_Scraper_0926 import clinical_scraper
 from FDA_Scraper_0926 import fda_scraper
 from Epi_Scraper_0926 import run_epi_scraper
 
+#TESTING GIT UPLOAD
+
 class ScraperGUI:
     def __init__(self, master):
         self.master = master
-        self.master.title("Scraper Input")
+        self.master.title("Eurus Input")
         self.master.geometry("700x500")  # Increased size to accommodate new checkboxes
 
         self.create_widgets()
@@ -79,7 +82,7 @@ class ScraperGUI:
         self.fda_date_entry.grid(row=4, column=1, padx=5, pady=5)
 
         # Run Button
-        ttk.Button(self.master, text="Run Scraper", command=self.run_scraper).grid(row=5, column=0, columnspan=2, pady=20)
+        ttk.Button(self.master, text="Run Eurus", command=self.run_scraper).grid(row=5, column=0, columnspan=2, pady=20)
 
     def run_scraper(self):
         condition = self.condition_entry.get()
@@ -171,7 +174,7 @@ def run_main_scraper(condition, start_year, clinical_status, interventions, fda_
     matched_df = pd.DataFrame(matched_companies)
 
     # Filter out matches with low confidence score
-    threshold = 85  # Adjust this threshold based on inspection
+    threshold = 90  # Adjust this threshold based on inspection
     filtered_matched_df = matched_df[matched_df['Match Score'] >= threshold]
 
     # Sort the filtered DataFrame by Match Score in descending order
@@ -186,7 +189,32 @@ def run_main_scraper(condition, start_year, clinical_status, interventions, fda_
 
     print(f"Sorted Matches Comparison data appended to {output_path}")
 
+    # Extract CIK numbers for companies with match score above 95
+    high_match_ciks = filtered_matched_df['CIK Code'].tolist()
+
+    # Specify the path for the cikList.txt file
+    cik_list_path = r'C:\Users\DaneCallow\Desktop\BSPROJ\Scraper\Newest\OneDrive_2024-09-26\EDGAR Scraper - Ashan\cikList.txt'
+
+    # Write the CIK numbers to the text document, overwriting the file each time
+    with open(cik_list_path, 'w') as file:
+        for cik in high_match_ciks:
+            file.write(str(cik) + '\n')
+
+    print(f"CIK numbers for high-matching companies written to {cik_list_path}")
+    
 if __name__ == "__main__":
     root = tk.Tk()
     app = ScraperGUI(root)
     root.mainloop()
+
+    # Path to the application
+    app_path = r"C:\Users\DaneCallow\Desktop\BSPROJ\Scraper\Newest\OneDrive_2024-09-26\EDGAR Scraper - Ashan\ScraperTemplate.exe"
+
+    # Run the application
+    try:
+        subprocess.run(app_path, check=True)
+        print(f"Successfully ran application at {app_path}")
+    except subprocess.CalledProcessError as e:
+        print(f"Error running application: {e}")
+    except FileNotFoundError:
+        print(f"Application not found at {app_path}")

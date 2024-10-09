@@ -1,16 +1,22 @@
 import pandas as pd
+import requests
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
 import openpyxl
 import os
 from datetime import datetime, timedelta
+from io import BytesIO
 
-# Replace this with the actual path to your Excel file on the desktop
-file_path = r'C:\Users\DaneCallow\Desktop\BSPROJ\Scraper\Newest\SEER_STAT_Epi.xlsx'
+# Replace this URL with the raw GitHub URL of your Excel file
+github_excel_url = "https://raw.githubusercontent.com/fedesomaini/Scraper_V2/master/SEER_STAT_Epi.xlsx"
 
-# Read the data from the Excel file
-data = pd.read_excel(file_path)
+# Fetch the file from GitHub
+response = requests.get(github_excel_url)
+response.raise_for_status()  # This will raise an exception for HTTP errors
+
+# Read the Excel file from the response content
+data = pd.read_excel(BytesIO(response.content), engine='openpyxl')
 
 print(f"Data loaded. Shape: {data.shape}")
 print(f"Columns: {data.columns}")

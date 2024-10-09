@@ -101,7 +101,7 @@ def clinical_scraper(condition, start_year, statuses, interventions):
     file_name = f"{condition.replace(' ', '_')}_{today}.csv"
     
     # Save the DataFrame to a specific folder with the dynamic file name
-    output_path = r'C:\Users\DaneCallow\Desktop\BSPROJ\Scraper\Sandbox' + '\\' + file_name
+    output_path = r'C:\Users\DaneCallow\Desktop\BSPROJ\Scraper\Newest' + '\\' + file_name
     df.to_csv(output_path, index=False)
     print(f"Data saved to {output_path}")
 
