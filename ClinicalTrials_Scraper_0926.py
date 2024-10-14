@@ -3,7 +3,8 @@ import pandas as pd
 from datetime import datetime, date
 import time
 
-"EXAMPLE EDIT TO TEST GITHUB"
+"ANOTHER TEST"
+
 
 def clinical_scraper(condition, start_year, statuses, interventions):
     base_url = 'https://clinicaltrials.gov/api/v2/studies'
