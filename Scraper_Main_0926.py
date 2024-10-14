@@ -12,6 +12,18 @@ from Epi_Scraper_0926 import run_epi_scraper
 
 #TESTING GIT UPLOAD
 
+
+'''
+This text is a test for github.
+import os
+
+# Use os.path to navigate directories and avoid hardcoding paths
+current_dir = os.path.dirname(os.path.abspath(__file__))  # Directory of the current script
+file_path = os.path.join(current_dir, "file.xlsx")  # File in the same directory as the script
+
+
+'''
+
 class ScraperGUI:
     def __init__(self, master):
         self.master = master
@@ -146,7 +158,7 @@ def run_main_scraper(condition, start_year, clinical_status, interventions, fda_
     combined_companies = pd.concat([clinical_companies, fda_companies]).drop_duplicates().reset_index(drop=True)
     combined_companies_list = combined_companies.tolist()
 
-    # Standardize company names
+    # Standardize the company names
     processed_companies_list = [company.replace(",", "").replace(" ", "").replace(".", "").lower() for company in combined_companies_list]
 
     print("The number of companies retrieved from FDA and CT scrapers is " + str(len(processed_companies_list)))
@@ -170,7 +182,7 @@ def run_main_scraper(condition, start_year, clinical_status, interventions, fda_
                 'CIK Code': cik_df.loc[matched_index, 'CIK Code'],
                 'Match Score': match[1]
             })
-
+    # creating dataframe form matched companies
     matched_df = pd.DataFrame(matched_companies)
 
     # Filter out matches with low confidence score
