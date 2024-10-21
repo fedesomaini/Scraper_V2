@@ -1,28 +1,9 @@
 import pandas as pd
 import tkinter as tk
-from tkinter import ttk
-from tkinter import filedialog, messagebox
-import os
-import sys
-import subprocess
-from rapidfuzz import fuzz, process
+from tkinter import ttk, messagebox
 from ClinicalTrials_Scraper_0926 import clinical_scraper
 from FDA_Scraper_0926 import fda_scraper
 from Epi_Scraper_0926 import run_epi_scraper
-
-#TESTING GIT UPLOAD
-
-
-'''
-This text is a test for github.
-import os
-
-# Use os.path to navigate directories and avoid hardcoding paths
-current_dir = os.path.dirname(os.path.abspath(__file__))  # Directory of the current script
-file_path = os.path.join(current_dir, "file.xlsx")  # File in the same directory as the script
-
-
-'''
 
 class ScraperGUI:
     def __init__(self, master):
@@ -87,18 +68,31 @@ class ScraperGUI:
             var = tk.BooleanVar()
             ttk.Checkbutton(self.intervention_frame, text=intervention, variable=var).grid(row=i//3, column=i%3, sticky="w")
             self.intervention_vars[intervention] = var
+        
+        # Phase selection
+        ttk.Label(self.master, text="Phase of clinical study:").grid(row=4, column=0, padx=5, pady=5, sticky="w")
+        self.phase_frame = ttk.Frame(self.master)
+        self.phase_frame.grid(row=4, column=1, padx=5, pady=5, sticky="w")
+
+        self.phase_vars = {}
+        phases = ["Phase 1", "Phase 2", "Phase 3", "Phase 4"]
+        for i, phase in enumerate(phases):
+            var = tk.BooleanVar()
+            ttk.Checkbutton(self.phase_frame, text=phase, variable=var).grid(row=0, column=i, sticky="w")  # All in row=0, but column=i
+            self.phase_vars[phase] = var
 
         # FDA Approval Year
-        ttk.Label(self.master, text="Earliest approval year for labeled drug:").grid(row=4, column=0, padx=5, pady=5, sticky="w")
+        ttk.Label(self.master, text="Earliest approval year for labeled drug:").grid(row=5, column=0, padx=5, pady=5, sticky="w")
         self.fda_date_entry = ttk.Entry(self.master, width=30)
-        self.fda_date_entry.grid(row=4, column=1, padx=5, pady=5)
+        self.fda_date_entry.grid(row=5, column=1, padx=5, pady=5)
 
         # Run Button
-        ttk.Button(self.master, text="Run Eurus", command=self.run_scraper).grid(row=5, column=0, columnspan=2, pady=20)
+        ttk.Button(self.master, text="Run Eurus", command=self.run_scraper).grid(row=6, column=0, columnspan=2, pady=20)
 
     def run_scraper(self):
         condition = self.condition_entry.get()
         start_year = self.clinical_date_entry.get()
+
         # Validate that start_year is a valid year
         try:
             start_year = int(start_year)
@@ -107,126 +101,90 @@ class ScraperGUI:
         except ValueError:
             messagebox.showerror("Error", "Please enter a valid year (YYYY) for the clinical trial start year")
             return
+
         clinical_status = [status for status, var in self.status_vars.items() if var.get()]
         interventions = [intervention for intervention, var in self.intervention_vars.items() if var.get()]
         fda_date = self.fda_date_entry.get()
+
+        # Collect selected phases
+        phases = [phase for phase, var in self.phase_vars.items() if var.get()]
 
         if not all([condition, start_year, clinical_status, interventions, fda_date]):
             messagebox.showerror("Error", "All fields must be filled")
             return
 
+        # Destroy the GUI window before running the scraper
+        self.master.quit()  # Stop the tkinter main loop
         self.master.destroy()  # Close the GUI window
 
-        # Run the scraper with the collected inputs
-        run_main_scraper(condition, start_year, clinical_status, interventions, fda_date)
+        # Run the scraper with the collected inputs, including phases
+        run_main_scraper(condition, start_year, clinical_status, interventions, fda_date, phases)
 
-def run_main_scraper(condition, start_year, clinical_status, interventions, fda_date):
-    print("Starting Clinical Trials Scraper...")
-    clinical_df = clinical_scraper(condition, start_year, clinical_status, interventions)
+def run_main_scraper(condition, start_year, clinical_status, interventions, fda_date, phases):
+    # Display inputs
+    print(f"Running scraper with the following inputs:")
+    print(f"Condition: {condition}")
+    print(f"Start Year: {start_year}")
+    print(f"Clinical Status: {clinical_status}")
+    print(f"Interventions: {interventions}")
+    print(f"FDA Approval Year: {fda_date}")
+    print(f"Phases: {phases}")
     
-    print("Starting FDA Scraper...")
+    # Call the clinical trials scraper and store the result in a DataFrame
     try:
+        print("Starting Clinical Trials Scraper...")
+        clinical_df = clinical_scraper(condition, start_year, clinical_status, interventions, phases)
+        print(f"Clinical Trials Data Retrieved: {clinical_df.shape[0]} records")
+    except Exception as e:
+        print(f"Error during Clinical Trials Scraper: {e}")
+        clinical_df = pd.DataFrame()  # Create an empty DataFrame if something fails
+
+    # Call the FDA scraper and store the result in a DataFrame
+    try:
+        print("Starting FDA Scraper...")
         fda_df = fda_scraper(condition, int(fda_date))
         if fda_df is None or fda_df.empty:
             print("FDA scraper returned no results. Creating an empty DataFrame.")
             fda_df = pd.DataFrame()
+        print(f"FDA Data Retrieved: {fda_df.shape[0]} records")
     except Exception as e:
-        print(f"Error in FDA scraper: {e}")
-        fda_df = pd.DataFrame()  # Create an empty DataFrame if FDA scraper fails
+        print(f"Error during FDA Scraper: {e}")
+        fda_df = pd.DataFrame()
 
-    print("Starting Epi-Scraper process...")
+    # Call the Epi scraper and store the result in a DataFrame
     try:
-        epi_df = run_epi_scraper(condition)  # Note: We're only passing the condition now
+        print("Starting Epi-Scraper process...")
+        epi_df = run_epi_scraper(condition)  # Assuming only condition is passed
+        print(f"Epi Data Retrieved: {epi_df.shape[0]} records")
     except Exception as e:
-        print(f"Error in Epi-Scraper: {e}")
-        epi_df = pd.DataFrame()  # Create an empty DataFrame if Epi-Scraper fails
+        print(f"Error during Epi-Scraper: {e}")
+        epi_df = pd.DataFrame()
 
     # Save all data to Excel
-    output_path = r'C:\Users\DaneCallow\Desktop\BSPROJ\Scraper\Newest\Scraper_Data.xlsx'
+    output_path = r'C:\Webscraper\Scraper_V2\OutputSave.xlsx'
     with pd.ExcelWriter(output_path) as writer:
-        clinical_df.to_excel(writer, sheet_name='Clinical Data', index=False)
-        fda_df.to_excel(writer, sheet_name='FDA Data', index=False)
-        epi_df.to_excel(writer, sheet_name='Epi Data', index=False)
+        if not clinical_df.empty:
+            clinical_df.to_excel(writer, sheet_name='Clinical Data', index=False)
+        if not fda_df.empty:
+            fda_df.to_excel(writer, sheet_name='FDA Data', index=False)
+        if not epi_df.empty:
+            epi_df.to_excel(writer, sheet_name='Epi Data', index=False)
     
     print(f"Data saved to {output_path}")
 
-    # Extract company names
-    clinical_companies = clinical_df['Lead Sponsor'] if 'Lead Sponsor' in clinical_df.columns else pd.Series()
-    fda_companies = fda_df['Manufacturer Name'] if 'Manufacturer Name' in fda_df.columns else pd.Series()
-
-    # Combine the contents and remove duplicates
-    combined_companies = pd.concat([clinical_companies, fda_companies]).drop_duplicates().reset_index(drop=True)
-    combined_companies_list = combined_companies.tolist()
-
-    # Standardize the company names
-    processed_companies_list = [company.replace(",", "").replace(" ", "").replace(".", "").lower() for company in combined_companies_list]
-
-    print("The number of companies retrieved from FDA and CT scrapers is " + str(len(processed_companies_list)))
-
-    # OBTAIN CIK CODES
-    cik_companies_path = r'C:\Users\DaneCallow\Documents\GitHub\Scraper_V2\cik_companies.csv'
-    cik_df = pd.read_csv(cik_companies_path)
-
-    # Standardize company names in cik_df
-    cik_df['processed_company_name'] = cik_df['Company Name'].str.replace(",", "").str.replace(" ", "").str.replace(".", "").str.lower()
-
-    # Use approximate matching to find matches
-    matched_companies = []
-    for company in processed_companies_list:
-        matches = process.extract(company, cik_df['processed_company_name'], limit=1, scorer=fuzz.ratio)
-        for match in matches:
-            matched_index = cik_df[cik_df['processed_company_name'] == match[0]].index[0]
-            matched_companies.append({
-                'CIK Company Name': cik_df.loc[matched_index, 'Company Name'],
-                'FDA+CT Company Name': combined_companies_list[processed_companies_list.index(company)],
-                'CIK Code': cik_df.loc[matched_index, 'CIK Code'],
-                'Match Score': match[1]
-            })
-    # creating dataframe form matched companies
-    matched_df = pd.DataFrame(matched_companies)
-
-    # Filter out matches with low confidence score
-    threshold = 90  # Adjust this threshold based on inspection
-    filtered_matched_df = matched_df[matched_df['Match Score'] >= threshold]
-
-    # Sort the filtered DataFrame by Match Score in descending order
-    sorted_matched_df = filtered_matched_df.sort_values(by='Match Score', ascending=False)
-
-    print(sorted_matched_df)
-    print("Number of matches:", len(sorted_matched_df))
-
-    # Append the sorted matches comparison data to the existing Excel file
-    with pd.ExcelWriter(output_path, mode='a') as writer:
-        sorted_matched_df.to_excel(writer, sheet_name='Matches Comparison', index=False)
-
-    print(f"Sorted Matches Comparison data appended to {output_path}")
-
-    # Extract CIK numbers for companies with match score above 95
-    high_match_ciks = filtered_matched_df['CIK Code'].tolist()
-
-    # Specify the path for the cikList.txt file
-    cik_list_path = r'C:\Users\DaneCallow\Desktop\BSPROJ\Scraper\Newest\OneDrive_2024-09-26\EDGAR Scraper - Ashan\cikList.txt'
-
-    # Write the CIK numbers to the text document, overwriting the file each time
-    with open(cik_list_path, 'w') as file:
-        for cik in high_match_ciks:
-            file.write(str(cik) + '\n')
-
-    print(f"CIK numbers for high-matching companies written to {cik_list_path}")
-    
 if __name__ == "__main__":
     root = tk.Tk()
     app = ScraperGUI(root)
     root.mainloop()
 
     # Path to the application
-    app_path = r"C:\Users\DaneCallow\Desktop\BSPROJ\Scraper\Newest\OneDrive_2024-09-26\EDGAR Scraper - Ashan\ScraperTemplate.exe"
+    #app_path = r"C:\Users\DaneCallow\Desktop\BSPROJ\Scraper\Newest\OneDrive_2024-09-26\EDGAR Scraper - Ashan\ScraperTemplate.exe"
 
     # Run the application
-    try:
-        subprocess.run(app_path, check=True)
-        print(f"Successfully ran application at {app_path}")
-    except subprocess.CalledProcessError as e:
-        print(f"Error running application: {e}")
-    except FileNotFoundError:
-        print(f"Application not found at {app_path}")
+   # try:
+        #subprocess.run(app_path, check=True)
+        #print(f"Successfully ran application at {app_path}")
+   # except subprocess.CalledProcessError as e:
+       # print(f"Error running application: {e}")
+    #except FileNotFoundError:
+       # print(f"Application not found at {app_path}")
