@@ -3,9 +3,7 @@ import pandas as pd
 from datetime import datetime, date
 import time
 
-"EXAMPLE EDIT TO TEST GITHUB"
-
-def clinical_scraper(condition, start_year, statuses, interventions):
+def clinical_scraper(condition, start_year, statuses, interventions, phases):
     base_url = 'https://clinicaltrials.gov/api/v2/studies'
     
     # Convert statuses to the format expected by the API
@@ -13,13 +11,24 @@ def clinical_scraper(condition, start_year, statuses, interventions):
     
     # Convert interventions to the format expected by the API
     intervention_query = ' OR '.join([f'AREA[InterventionType] {i}' for i in interventions])
-    
+
+    # Convert phases to the format expected by the API
+    if phases:
+        phase_query = ' OR '.join([f'AREA[Phase] {p}' for p in phases])
+    else:
+        phase_query = None
+
+    # Create the advanced filter query
+    advanced_filter = f'AREA[StartDate]RANGE[{start_year}-01-01,MAX]'
+    if phase_query:
+        advanced_filter += f' AND ({phase_query})'
+
     params = {
         'format': 'json',
         'query.cond': condition,
         'query.intr': intervention_query,
         'query.spons': 'AREA[LeadSponsorClass] INDUSTRY',
-        'filter.advanced': f'AREA[StartDate]RANGE[{start_year}-01-01,MAX]',
+        'filter.advanced': advanced_filter,
         'filter.overallStatus': status_query,
         'fields': 'NCTId,BriefTitle,Acronym,OverallStatus,StartDate,PrimaryCompletionDate,CompletionDate,StudyFirstPostDate,LastUpdatePostDate,StudyType,Phase,EnrollmentCount,LeadSponsorName,LeadSponsorClass,Condition,InterventionName,LocationFacility,LocationCity,LocationCountry',
         'pageSize': 100,
@@ -103,11 +112,12 @@ def clinical_scraper(condition, start_year, statuses, interventions):
     file_name = f"{condition.replace(' ', '_')}_{today}.csv"
     
     # Save the DataFrame to a specific folder with the dynamic file name
-    output_path = r'C:\Users\DaneCallow\Desktop\BSPROJ\Scraper\Newest' + '\\' + file_name
+    output_path = r'C:\Webscraper\Scraper_V2\OutputSave' + '\\' + file_name
     df.to_csv(output_path, index=False)
     print(f"Data saved to {output_path}")
 
     return df
+
 
 # Example usage
 # if __name__ == "__main__":

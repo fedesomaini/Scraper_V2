@@ -1,11 +1,6 @@
 import pandas as pd
 import requests
-import tkinter as tk
-from tkinter import ttk
-from tkinter import filedialog
-import openpyxl
-import os
-from datetime import datetime, timedelta
+from datetime import datetime
 from io import BytesIO
 
 # Replace this URL with the raw GitHub URL of your Excel file
@@ -24,59 +19,25 @@ print(f"First few rows:\n{data.head()}")
 print(f"Unique YEAR values: {data['YEAR'].unique()}")
 print(f"Unique SITE values: {data['SITE'].unique()}")
 
-class CancerRateSelector:
-    def __init__(self, master, condition):
-        self.master = master
-        self.master.title("Cancer Rate Selector")
-        self.master.geometry("400x400")
-
-        self.condition = condition
-        self.selected_sites = []
-
-        # Get the current year
-        current_year = datetime.now().year
-        # Calculate the start year (10 years ago)
-        self.start_year = current_year - 10
-
-        self.create_site_selection()
-
-    def create_site_selection(self):
-        self.site_frame = ttk.Frame(self.master)
-        self.site_frame.pack(fill=tk.BOTH, expand=True)
-
-        site_label = ttk.Label(self.site_frame, text="Select Site(s):")
-        site_label.pack()
-
-        self.site_listbox = tk.Listbox(self.site_frame, selectmode=tk.MULTIPLE)
-        self.site_listbox.pack(fill=tk.BOTH, expand=True)
-
-        sites = sorted(data['SITE'].unique())
-        for site in sites:
-            if self.condition.lower() in site.lower():
-                self.site_listbox.insert(tk.END, site)
-
-        save_button = ttk.Button(self.site_frame, text="Save Selection", command=self.save_selection)
-        save_button.pack()
-
-    def save_selection(self):
-        self.selected_sites = [self.site_listbox.get(i) for i in self.site_listbox.curselection()]
-        self.master.quit()
-
-def run_epi_scraper(condition):
-    root = tk.Tk()
-    app = CancerRateSelector(root, condition)
-    root.mainloop()
+def run_epi_scraper(condition, selected_sites):
+    """
+    Function to run the epidemiological scraper with the given condition and selected sites.
+    :param condition: The condition for which to filter the data.
+    :param selected_sites: The list of selected sites from the main GUI.
+    :return: A filtered and pivoted DataFrame with epidemiological data.
+    """
+    print(f"Running Epi Scraper for condition: {condition} and sites: {selected_sites}")
 
     # Get the current year
     current_year = datetime.now().year
     # Calculate the start year (10 years ago)
     start_year = current_year - 10
 
-    # Filter the data based on selections
+    # Filter the data based on the selected sites and year range
     filtered_data = data[
         (data['YEAR'] >= start_year) & 
         (data['YEAR'] <= current_year) & 
-        (data['SITE'].isin(app.selected_sites))
+        (data['SITE'].isin(selected_sites))
     ]
 
     if filtered_data.empty:
@@ -89,12 +50,13 @@ def run_epi_scraper(condition):
     # Sort the columns (years) in ascending order
     pivoted_data = pivoted_data.sort_index(axis=1)
 
-    # Add the indication as the first column
+    # Add the condition as the first column
     pivoted_data.insert(0, 'Indication', condition)
 
     return pivoted_data
 
 if __name__ == "__main__":
     # For testing purposes
-    result = run_epi_scraper("Liver")
+    selected_sites = ["Liver", "Lung"]  # Example site selections passed from the main GUI
+    result = run_epi_scraper("Liver", selected_sites)
     print(result)
