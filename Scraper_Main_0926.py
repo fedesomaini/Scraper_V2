@@ -1,33 +1,162 @@
 import pandas as pd
 import tkinter as tk
+import requests
+from io import StringIO
+from rapidfuzz import process, fuzz
 from tkinter import ttk, messagebox
 from ClinicalTrials_Scraper_0926 import clinical_scraper
 from FDA_Scraper_0926 import fda_scraper
 from Epi_Scraper_0926 import run_epi_scraper
+from USPTO_Patent import fetch_all_results, process_patents
 
 class ScraperGUI:
     def __init__(self, master):
         self.master = master
         self.master.title("Eurus Input")
-        self.master.geometry("700x500")  # Increased size to accommodate new checkboxes
+        self.master.geometry("800x600")  # Increased size to accommodate new checkboxes
+        self.conditions = [
+            "All sites", 
+            "Acute Myeloid Leukemias", 
+            "Adnexa Other And Genital Female Other",
+            "Adrenal Gland", 
+            "Ampulla Of Vater", 
+            "Anus, Anal Canal And Anorectum",
+            "Appendix",
+            "Biliary Other",
+            "Bones And Joints",
+            "Bones And Soft Tissue",
+            "Brain (Malignant)", 
+            "Brain, CNS Other and Intracranial Gland (Benign and Borderline)",
+            "Breast", 
+            "Buccal Mucosa", 
+            "Central Nervous System", 
+            "Cervix",
+            "Chronic lymphocytic leukemia (CLL)/Small lymphocytic lymphoma",
+            "CNS Other (Malignant)", 
+            "Colon And Rectum (Excluding Appendix)", 
+            "Corpus",
+            "Digestive Other", 
+            "Digestive System", 
+            "Endocrine Other", 
+            "Endocrine System",
+            "Esophagus", 
+            "Extrahepatic Bile Ducts", 
+            "Eye And Orbit", 
+            "Fallopian Tube",
+            "Female Genital System", 
+            "Floor Of Mouth", 
+            "Gallbladder", 
+            "Genital Male Other",
+            "Gum", 
+            "Head And Neck", 
+            "Heart, Mediastinum And Pleura", 
+            "Hematopoietic Neoplasms",
+            "Hodgkin Lymphomas", 
+            "Hypopharynx", 
+            "Intracranial Gland (Malignant)",
+            "Intrahepatic Bile Duct", 
+            "Kaposi Sarcoma", 
+            "Kidney Parenchyma",
+            "Kidney Renal Pelvis", 
+            "Larynx", 
+            "Leukemias", 
+            "Lip", 
+            "Liver",
+            "Lung And Bronchus", 
+            "Lymphoid Leukemias (excluding CLL/SLL)", 
+            "Lymphomas",
+            "Major Salivary Glands", 
+            "Male Genital System", 
+            "Melanoma Of The Skin",
+            "Meninges (Malignant)", 
+            "Mesothelioma", 
+            "Miscellaneous Hematopoietic Neoplasms",
+            "Miscellaneous Neoplasms", 
+            "Mouth Other",
+            "Myeloproliferative Neoplasms and Myelodysplastic Syndromes",
+            "Nasal Cavity And Paranasal Sinuses", 
+            "Nasopharynx", 
+            "Non-Hodgkin Lymphomas",
+            "Oropharynx", 
+            "Other Hematopoietic Neoplasms", 
+            "Other Leukemias",
+            "Other Non-Epithelial Skin", 
+            "Ovary", 
+            "Palate Excluding Soft And Uvula",
+            "Pancreas", 
+            "Parathyroid", 
+            "Penis", 
+            "Pharynx And Oral Cavity Other", 
+            "Placenta",
+            "Plasma Cell Neoplasms and Immunoproliferative Diseases",
+            "Precursor Lymphoid Neoplasms", 
+            "Prostate", 
+            "Respiratory Tract And Thorax",
+            "Retroperitoneum And Peritoneum", 
+            "Sinus Other", 
+            "Skin", 
+            "Small Intestine",
+            "Soft Tissue", 
+            "Stomach", 
+            "Testis", 
+            "Thymus", 
+            "Thyroid", 
+            "Tongue Anterior",
+            "Trachea, And Respiratory Other", 
+            "Ureter", 
+            "Urethra", 
+            "Urinary Bladder",
+            "Urinary Other", 
+            "Urinary System", 
+            "Vagina", 
+            "Vulva"
+        ]
 
         self.create_widgets()
 
     def create_widgets(self):
         # Indication
-        ttk.Label(self.master, text="Indication:").grid(row=0, column=0, padx=5, pady=5, sticky="w")
-        self.condition_entry = ttk.Entry(self.master, width=30)
-        self.condition_entry.grid(row=0, column=1, padx=5, pady=5)
+        ttk.Label(self.master, text="Indication:*").grid(row=0, 
+                                                        column=0, 
+                                                        padx=15, 
+                                                        pady=20, 
+                                                        sticky="w")
+        self.condition_var = tk.StringVar()
+        self.condition_dropdown = ttk.Combobox(self.master, textvariable=self.condition_var, values=self.conditions, 
+                                               width=37)
+        self.condition_dropdown.grid(row=0, 
+                                     column=1, 
+                                     padx=15, 
+                                     pady=20,
+                                     sticky="w")
+        self.condition_dropdown.set(self.conditions[0])  # Set default value
 
         # Clinical Trials Start Year
-        ttk.Label(self.master, text="Earliest start year for clinical trials:").grid(row=1, column=0, padx=5, pady=5, sticky="w")
-        self.clinical_date_entry = ttk.Entry(self.master, width=30)
-        self.clinical_date_entry.grid(row=1, column=1, padx=5, pady=5)
+        ttk.Label(self.master, text="Earliest start year for clinical trials:*").grid(row=1, 
+                                                                                     column=0, 
+                                                                                     padx=15, 
+                                                                                     pady=5, 
+                                                                                     sticky="w")
+        self.clinical_date_entry = ttk.Entry(self.master, 
+                                             width=40)
+        self.clinical_date_entry.grid(row=1, 
+                                    column=1, 
+                                    padx=15, 
+                                    pady=5,
+                                    sticky="w")
 
         # Clinical Trials Status
-        ttk.Label(self.master, text="Status of the clinical trial:").grid(row=2, column=0, padx=5, pady=5, sticky="w")
+        ttk.Label(self.master, text="Status of the clinical trial:*").grid(row=2, 
+                                                                          column=0, 
+                                                                          padx=15, 
+                                                                          pady=20, 
+                                                                          sticky="w")
         self.status_frame = ttk.Frame(self.master)
-        self.status_frame.grid(row=2, column=1, padx=5, pady=5, sticky="w")
+        self.status_frame.grid(row=2, 
+                               column=1, 
+                               padx=15, 
+                               pady=20, 
+                               sticky="w")
 
         self.status_vars = {}
         statuses = [
@@ -42,13 +171,22 @@ class ScraperGUI:
         ]
         for i, status in enumerate(statuses):
             var = tk.BooleanVar()
-            ttk.Checkbutton(self.status_frame, text=status, variable=var).grid(row=i//2, column=i%2, sticky="w")
+            ttk.Checkbutton(self.status_frame, text=status, variable=var).grid(row=i//2,
+                                                                               column=i%2, 
+                                                                               sticky="w")
             self.status_vars[status] = var
 
         # Intervention Types
-        ttk.Label(self.master, text="Intervention Types:").grid(row=3, column=0, padx=5, pady=5, sticky="w")
+        ttk.Label(self.master, text="Intervention Types:*").grid(row=3, 
+                                                                column=0, 
+                                                                padx=15, 
+                                                                pady=20, sticky="w")
         self.intervention_frame = ttk.Frame(self.master)
-        self.intervention_frame.grid(row=3, column=1, padx=5, pady=5, sticky="w")
+        self.intervention_frame.grid(row=3, 
+                                     column=1, 
+                                     padx=15, 
+                                     pady=20, 
+                                     sticky="w")
 
         self.intervention_vars = {}
         interventions = [
@@ -66,32 +204,110 @@ class ScraperGUI:
         ]
         for i, intervention in enumerate(interventions):
             var = tk.BooleanVar()
-            ttk.Checkbutton(self.intervention_frame, text=intervention, variable=var).grid(row=i//3, column=i%3, sticky="w")
+            ttk.Checkbutton(self.intervention_frame, 
+                            text=intervention, 
+                            variable=var).grid(row=i//3,
+                                               column=i%3,
+                                               sticky="w")
             self.intervention_vars[intervention] = var
         
         # Phase selection
-        ttk.Label(self.master, text="Phase of clinical study:").grid(row=4, column=0, padx=5, pady=5, sticky="w")
+        ttk.Label(self.master, 
+            text="Phase of clinical study:*").grid(row=4,
+                                                  column=0,
+                                                  padx=15,
+                                                  pady=20,
+                                                  sticky="w")
         self.phase_frame = ttk.Frame(self.master)
-        self.phase_frame.grid(row=4, column=1, padx=5, pady=5, sticky="w")
+        self.phase_frame.grid(row=4,
+                              column=1,
+                              padx=15,
+                              pady=20,
+                              sticky="w")
 
         self.phase_vars = {}
         phases = ["Phase 1", "Phase 2", "Phase 3", "Phase 4"]
         for i, phase in enumerate(phases):
             var = tk.BooleanVar()
-            ttk.Checkbutton(self.phase_frame, text=phase, variable=var).grid(row=0, column=i, sticky="w")  # All in row=0, but column=i
+            ttk.Checkbutton(self.phase_frame,
+                            text=phase,
+                            variable=var).grid(row=0,
+                                               column=i,
+                                               sticky="w")  # All in row=0, but column=i
             self.phase_vars[phase] = var
 
         # FDA Approval Year
-        ttk.Label(self.master, text="Earliest approval year for labeled drug:").grid(row=5, column=0, padx=5, pady=5, sticky="w")
-        self.fda_date_entry = ttk.Entry(self.master, width=30)
-        self.fda_date_entry.grid(row=5, column=1, padx=5, pady=5)
+        ttk.Label(self.master, 
+            text="Earliest approval year for labeled drug:*").grid(row=5,
+                                                                  column=0,
+                                                                  padx=15,
+                                                                  pady=5,
+                                                                  sticky="w")
+        self.fda_date_entry = ttk.Entry(self.master,
+                                        width=40)
+        self.fda_date_entry.grid(row=5, 
+                                 column=1, 
+                                 padx=15, 
+                                 pady=5,
+                                 sticky="w")
+        
+        # Company Name Entry for USPTO Search
+        ttk.Label(self.master, 
+            text="Name of company for patent search:").grid(row=6,
+                                                            column=0,
+                                                            padx=15,
+                                                            pady=5,
+                                                            sticky="w")
+        self.company_name_entry = ttk.Entry(self.master,
+                                             width=40)
+        self.company_name_entry.grid(row=6, 
+                                      column=1, 
+                                      padx=15, 
+                                      pady=5,
+                                      sticky="w")
+        
+        #Patent Date Range Start Entry
+        ttk.Label(self.master, text="Earliest year for patent application:").grid(row=7,
+                                                                                  column=0,
+                                                                                  padx=15,
+                                                                                  pady=5,
+                                                                                  sticky="w")
+        self.patent_start_date_entry = ttk.Entry(self.master, 
+                                        width=40)
+        self.patent_start_date_entry.grid(row=7,
+                                 column=1,
+                                 padx=15,
+                                 pady=5,
+                                 sticky="w")
+        
+        #Patent Date Range End Entry
+        ttk.Label(self.master, text="Latest year for patent application:").grid(row=8, 
+                                                                                column=0, 
+                                                                                padx=15, 
+                                                                                pady=5, 
+                                                                                sticky="w")
+        self.patent_end_date_entry = ttk.Entry(self.master, 
+                                        width=40)
+        self.patent_end_date_entry.grid(row=8, 
+                                 column=1, 
+                                 padx=15, 
+                                 pady=5,
+                                 sticky="w")
 
         # Run Button
-        ttk.Button(self.master, text="Run Eurus", command=self.run_scraper).grid(row=6, column=0, columnspan=2, pady=20)
+        run_button=(ttk.Button)(self.master, 
+                   text="Run Eurus", 
+                   command=self.run_scraper)
+        run_button.grid(row=9,
+                        columnspan=2,
+                        pady=20)
 
     def run_scraper(self):
-        condition = self.condition_entry.get()
+        condition = f'"{self.condition_var.get().strip('"')}"'
         start_year = self.clinical_date_entry.get()
+        company_name = (self.company_name_entry.get)()
+        patent_start_date = (self.patent_start_date_entry.get)()
+        patent_end_date = (self.patent_end_date_entry.get)()
 
         # Validate that start_year is a valid year
         try:
@@ -102,15 +318,15 @@ class ScraperGUI:
             messagebox.showerror("Error", "Please enter a valid year (YYYY) for the clinical trial start year")
             return
 
-        clinical_status = [status for status, var in self.status_vars.items() if var.get()]
-        interventions = [intervention for intervention, var in self.intervention_vars.items() if var.get()]
-        fda_date = self.fda_date_entry.get()
+        clinical_status =[status for status,(var) in (self.status_vars.items)() if var.get()]
+        interventions =[intervention for intervention,(var) in (self.intervention_vars.items)() if var.get()]
+        fda_date=self.fda_date_entry.get()
 
         # Collect selected phases
         phases = [phase for phase, var in self.phase_vars.items() if var.get()]
 
         if not all([condition, start_year, clinical_status, interventions, fda_date]):
-            messagebox.showerror("Error", "All fields must be filled")
+            messagebox.showerror("Error", "Select fields must be filled")
             return
 
         # Destroy the GUI window before running the scraper
@@ -118,9 +334,9 @@ class ScraperGUI:
         self.master.destroy()  # Close the GUI window
 
         # Run the scraper with the collected inputs, including phases
-        run_main_scraper(condition, start_year, clinical_status, interventions, fda_date, phases)
+        run_main_scraper(condition, start_year, clinical_status, interventions, fda_date, phases, company_name, patent_start_date, patent_end_date)
 
-def run_main_scraper(condition, start_year, clinical_status, interventions, fda_date, phases):
+def run_main_scraper(condition, start_year, clinical_status, interventions, fda_date, phases, company_name, patent_start_date, patent_end_date):
     # Display inputs
     print(f"Running scraper with the following inputs:")
     print(f"Condition: {condition}")
@@ -129,6 +345,9 @@ def run_main_scraper(condition, start_year, clinical_status, interventions, fda_
     print(f"Interventions: {interventions}")
     print(f"FDA Approval Year: {fda_date}")
     print(f"Phases: {phases}")
+    print(f"Company Name: {company_name}")
+    print(f"Patent Start Date: {patent_start_date}")
+    print(f"Patent End Date: {patent_end_date}")
     
     # Call the clinical trials scraper and store the result in a DataFrame
     try:
@@ -142,7 +361,8 @@ def run_main_scraper(condition, start_year, clinical_status, interventions, fda_
     # Call the FDA scraper and store the result in a DataFrame
     try:
         print("Starting FDA Scraper...")
-        fda_df = fda_scraper(condition, int(fda_date))
+        fda_condition = condition.strip('"')
+        fda_df = fda_scraper(fda_condition, int(fda_date))
         if fda_df is None or fda_df.empty:
             print("FDA scraper returned no results. Creating an empty DataFrame.")
             fda_df = pd.DataFrame()
@@ -159,9 +379,72 @@ def run_main_scraper(condition, start_year, clinical_status, interventions, fda_
     except Exception as e:
         print(f"Error during Epi-Scraper: {e}")
         epi_df = pd.DataFrame()
+        
+    # Call the USPTO scraper and store the result in a DataFrame
+    if company_name.strip():
+        try:
+            print("Starting USPTO Patent Scraper...")
+            uspto_results = fetch_all_results(company_name, patent_start_date, patent_end_date)
+            uspto_df = pd.DataFrame(process_patents(uspto_results))
+            if uspto_df.empty:
+                print("USPTO scraper returned no results. Creating an empty DataFrame.")
+            else:
+                print(f"USPTO Data Retrieved: {uspto_df.shape[0]} records")
+        except Exception as e:
+            print(f"Error during USPTO Patent Scraper: {e}")
+            uspto_df = pd.DataFrame()
+    else:
+        print("Company Name is blank. Skipping USPTO Patent Scraper.")
+        uspto_df = pd.DataFrame()
+        
+    # Extract company names
+    clinical_companies = clinical_df['Lead Sponsor'] if 'Lead Sponsor' in clinical_df.columns else pd.Series()
+    fda_companies = fda_df['Manufacturer Name'] if 'Manufacturer Name' in fda_df.columns else pd.Series()
+    
+    # Combine the contents and remove duplicates
+    combined_companies = pd.concat([clinical_companies, fda_companies]).drop_duplicates().reset_index(drop=True)
+    combined_companies_list = combined_companies.tolist()
+    
+    # Standardize company names
+    processed_companies_list = [company.replace(",", "").replace(" ", "").replace(".", "").lower() for company in combined_companies_list]
+     
+    print("The number of companies retrieved from FDA and CT scrapers is " + str(len(processed_companies_list)))
+
+    # OBTAIN CIK CODES
+    cik_companies_url = "https://raw.githubusercontent.com/fedesomaini/Scraper_V2/master/cik_companies.csv"
+    response = requests.get(cik_companies_url)
+    cik_df = pd.read_csv(StringIO(response.text))
+    
+    # Standardize company names in cik_df
+    cik_df['processed_company_name'] = cik_df['Company Name'].str.replace(",", "").str.replace(" ", "").str.replace(".", "").str.lower()
+    
+    # Use approximate matching to find matches
+    matched_companies = []
+    for company in processed_companies_list:
+        matches = process.extract(company, cik_df['processed_company_name'].tolist(), limit=1, scorer=fuzz.ratio)
+        for match in matches:
+            matched_index = cik_df[cik_df['processed_company_name'] == match[0]].index[0]
+            matched_companies.append({
+                'CIK Company Name': cik_df.loc[matched_index, 'Company Name'],
+                'FDA+CT Company Name': combined_companies_list[processed_companies_list.index(company)],
+                'CIK Code': cik_df.loc[matched_index, 'CIK Code'],
+                'Match Score': match[1]
+            })
+
+    matched_df = pd.DataFrame(matched_companies)
+
+    # Filter out matches with low confidence score
+    threshold = 85  # Adjust this threshold based on inspection
+    filtered_matched_df = matched_df[matched_df['Match Score'] >= threshold]
+
+    # Sort the filtered DataFrame by Match Score in descending order
+    sorted_matched_df = filtered_matched_df.sort_values(by='Match Score', ascending=False)
+
+    print(sorted_matched_df)
+    print("Number of matches:", len(sorted_matched_df))
 
     # Save all data to Excel
-    output_path = r'C:\Webscraper\Scraper_V2\OutputSave.xlsx'
+    output_path = r'C:\Users\DaneCallow\Documents\GitHub\Scraper_V2\output.xlsx'
     with pd.ExcelWriter(output_path) as writer:
         if not clinical_df.empty:
             clinical_df.to_excel(writer, sheet_name='Clinical Data', index=False)
@@ -169,6 +452,9 @@ def run_main_scraper(condition, start_year, clinical_status, interventions, fda_
             fda_df.to_excel(writer, sheet_name='FDA Data', index=False)
         if not epi_df.empty:
             epi_df.to_excel(writer, sheet_name='Epi Data', index=False)
+        if not uspto_df.empty:
+            uspto_df.to_excel(writer, sheet_name='USPTO Data', index=False)
+        sorted_matched_df.to_excel(writer, sheet_name='Matches Comparison', index=False)
     
     print(f"Data saved to {output_path}")
 

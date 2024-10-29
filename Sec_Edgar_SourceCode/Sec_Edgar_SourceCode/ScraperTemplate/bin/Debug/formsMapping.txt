@@ -1,0 +1,9 @@
+8-K|8-K|Y
+10-K|10-K|Y
+10-Q|10-Q|Y
+Schedule TO|SC TO-C|Y
+Schedule TO-T|SC TO-T|Y
+Schedule TO-T/A|SC TO-T/A|Y
+Schedule TO-I|SC TO-I|Y
+Schedule TO-I/A|SC TO-I/A|Y
+S4|S-4|Y
