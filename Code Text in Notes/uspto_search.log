@@ -1,0 +1,92 @@
+2024-10-16 14:08:15,207 - INFO - Script started with parameters: Amgen, 2023, multiple myeloma
+2024-10-16 14:08:15,207 - INFO - Starting search for Amgen, 2023, multiple myeloma
+2024-10-16 14:08:15,207 - INFO - Query: AANM:("Amgen") AND APD:[2023-01-01 TO 2023-12-31] AND ACLM:("multiple myeloma")
+2024-10-16 14:08:16,163 - INFO - HTTP Request: POST https://ped.uspto.gov/api/queries "HTTP/1.1 200 "
+2024-10-16 14:08:16,175 - ERROR - An error occurred: 'USApplication' object has no attribute 'filing_date'
+2024-10-16 14:08:16,187 - INFO - Script completed
+2024-10-16 14:08:41,855 - INFO - Script started with parameters: Epizyme, 2018, multiple myeloma
+2024-10-16 14:08:41,866 - INFO - Starting search for Epizyme, 2018, multiple myeloma
+2024-10-16 14:08:41,866 - INFO - Query: AANM:("Epizyme") AND APD:[2018-01-01 TO 2018-12-31] AND ACLM:("multiple myeloma")
+2024-10-16 14:08:42,677 - INFO - HTTP Request: POST https://ped.uspto.gov/api/queries "HTTP/1.1 200 "
+2024-10-16 14:08:42,704 - ERROR - An error occurred: 'USApplication' object has no attribute 'filing_date'
+2024-10-16 14:08:42,706 - INFO - Script completed
+2024-10-16 14:12:35,987 - INFO - Script started with parameters: Epizyme, 2019-06-06 to 2023-12-31, multiple myeloma
+2024-10-16 14:12:35,987 - INFO - Starting search for Epizyme, 2019-06-06 to 2023-12-31, multiple myeloma
+2024-10-16 14:12:35,987 - INFO - Query: AANM:("Epizyme") AND APD:[2019-06-06 TO 2023-12-31] AND ACLM:("multiple myeloma")
+2024-10-16 14:12:37,145 - INFO - HTTP Request: POST https://ped.uspto.gov/api/queries "HTTP/1.1 200 "
+2024-10-16 14:12:37,173 - ERROR - An error occurred: 'USApplication' object has no attribute 'filing_date'
+2024-10-16 14:12:37,175 - INFO - All searches completed
+2024-10-16 14:13:37,356 - INFO - Script started with parameters: Epizyme, 2000-06-06 to 2023-12-31, multiple myeloma
+2024-10-16 14:13:37,356 - INFO - Starting search for Epizyme, 2000-06-06 to 2023-12-31, multiple myeloma
+2024-10-16 14:13:37,356 - INFO - Query: AANM:("Epizyme") AND APD:[2000-06-06 TO 2023-12-31] AND ACLM:("multiple myeloma")
+2024-10-16 14:13:37,940 - INFO - HTTP Request: POST https://ped.uspto.gov/api/queries "HTTP/1.1 200 "
+2024-10-16 14:13:37,960 - ERROR - An error occurred: 'USApplication' object has no attribute 'filing_date'
+2024-10-16 14:13:37,962 - INFO - All searches completed
+2024-10-16 14:17:51,598 - INFO - Script started with parameters: Epizyme, 2018-01-01 to 2023-12-31, multiple myeloma
+2024-10-16 14:17:51,598 - INFO - Starting search for Epizyme, 2018-01-01 to 2023-12-31, multiple myeloma
+2024-10-16 14:17:51,598 - INFO - Query: (AN:("Epizyme") OR AANM:("Epizyme")) AND APD:[2018-01-01 TO 2023-12-31]
+2024-10-16 14:17:52,886 - INFO - HTTP Request: POST https://ped.uspto.gov/api/queries "HTTP/1.1 200 "
+2024-10-16 14:17:52,904 - ERROR - An error occurred: 'USApplication' object has no attribute 'title'
+2024-10-16 14:17:52,906 - INFO - All searches completed
+2024-10-16 14:18:46,295 - INFO - Script started with parameters: Epizyme, 2000-01-01 to 2023-12-31, multiple myeloma
+2024-10-16 14:18:46,295 - INFO - Starting search for Epizyme, 2000-01-01 to 2023-12-31, multiple myeloma
+2024-10-16 14:18:46,295 - INFO - API Request: https://developer.uspto.gov/ibd-api/v1/application/publications
+2024-10-16 14:18:46,295 - INFO - Params: {'searchText': '(AN:("Epizyme") OR AANM:("Epizyme")) AND APD:[2000-01-01 TO 2023-12-31]', 'start': 0, 'rows': 100}
+2024-10-16 14:18:46,914 - ERROR - API request failed: 500 Server Error: Internal Server Error for url: https://developer.uspto.gov/ibd-api/v1/application/publications?searchText=%28AN%3A%28%22Epizyme%22%29+OR+AANM%3A%28%22Epizyme%22%29%29+AND+APD%3A%5B2000-01-01+TO+2023-12-31%5D&start=0&rows=100
+2024-10-16 14:18:46,921 - INFO - All searches completed
+2024-10-16 14:19:07,254 - INFO - Script started with parameters: Epizyme, 2000-01-01 to 2023-12-31, cancer
+2024-10-16 14:19:07,254 - INFO - Starting search for Epizyme, 2000-01-01 to 2023-12-31, cancer
+2024-10-16 14:19:07,255 - INFO - API Request: https://developer.uspto.gov/ibd-api/v1/application/publications
+2024-10-16 14:19:07,255 - INFO - Params: {'searchText': '(AN:("Epizyme") OR AANM:("Epizyme")) AND APD:[2000-01-01 TO 2023-12-31]', 'start': 0, 'rows': 100}
+2024-10-16 14:19:07,795 - ERROR - API request failed: 500 Server Error: Internal Server Error for url: https://developer.uspto.gov/ibd-api/v1/application/publications?searchText=%28AN%3A%28%22Epizyme%22%29+OR+AANM%3A%28%22Epizyme%22%29%29+AND+APD%3A%5B2000-01-01+TO+2023-12-31%5D&start=0&rows=100
+2024-10-16 14:19:07,802 - INFO - All searches completed
+2024-10-16 14:19:35,933 - INFO - Script started with parameters: Epizyme, Inc, 2000-01-01 to 2023-12-31, cancer
+2024-10-16 14:19:35,933 - INFO - Starting search for Epizyme, Inc, 2000-01-01 to 2023-12-31, cancer
+2024-10-16 14:19:35,933 - INFO - API Request: https://developer.uspto.gov/ibd-api/v1/application/publications
+2024-10-16 14:19:35,933 - INFO - Params: {'searchText': '(AN:("Epizyme, Inc") OR AANM:("Epizyme, Inc")) AND APD:[2000-01-01 TO 2023-12-31]', 'start': 0, 'rows': 100}
+2024-10-16 14:19:36,560 - ERROR - API request failed: 500 Server Error: Internal Server Error for url: https://developer.uspto.gov/ibd-api/v1/application/publications?searchText=%28AN%3A%28%22Epizyme%2C+Inc%22%29+OR+AANM%3A%28%22Epizyme%2C+Inc%22%29%29+AND+APD%3A%5B2000-01-01+TO+2023-12-31%5D&start=0&rows=100
+2024-10-16 14:19:36,567 - INFO - All searches completed
+2024-10-16 14:25:45,357 - INFO - Script started with parameters: Epizyme, Inc., 2000-01-01 to 2023-12-31, multiple myeloma
+2024-10-16 14:25:45,357 - INFO - Starting search for Epizyme, Inc., 2000-01-01 to 2023-12-31, multiple myeloma
+2024-10-16 14:25:45,357 - INFO - Query: (AN:("Epizyme, Inc.") OR AANM:("Epizyme, Inc.")) AND APD:[2000-01-01 TO 2023-12-31]
+2024-10-16 14:25:46,343 - INFO - HTTP Request: POST https://ped.uspto.gov/api/queries "HTTP/1.1 200 "
+2024-10-16 14:25:46,364 - ERROR - An error occurred: 'USApplication' object has no attribute 'invention_title'
+2024-10-16 14:25:46,365 - INFO - All searches completed
+2024-10-16 14:32:44,069 - INFO - Script started with parameters: Epizyme, Inc., 2000-01-01 to 2023-12-31, multiple myeloma
+2024-10-16 14:32:44,069 - INFO - Starting search for Epizyme, Inc., 2000-01-01 to 2023-12-31, multiple myeloma
+2024-10-16 14:32:44,069 - INFO - Query: AN:("Epizyme, Inc.") AND APD:[2000-01-01 TO 2023-12-31] AND ACLM:("multiple myeloma")
+2024-10-16 14:33:05,114 - ERROR - An error occurred: HTTPConnectionPool(host='patft.uspto.gov', port=80): Max retries exceeded with url: /netacgi/nph-Parser?Sect1=PTO2&Sect2=HITOFF&u=%2Fnetahtml%2FPTO%2Fsearch-adv.htm&r=0&p=1&f=S&l=50&Query=AN:(%22Epizyme,-Inc.%22)-AND-APD:%5B2000-01-01-TO-2023-12-31%5D-AND-ACLM:(%22multiple-myeloma%22)&d=PTXT (Caused by ConnectTimeoutError(<urllib3.connection.HTTPConnection object at 0x00000226DCFC7680>, 'Connection to patft.uspto.gov timed out. (connect timeout=None)'))
+2024-10-16 14:33:05,118 - INFO - Script completed
+2024-10-16 14:35:01,983 - INFO - Script started with parameters: Epizyme, Inc., 2000-01-01 to 2023-12-31, multiple myeloma
+2024-10-16 14:35:01,983 - INFO - Starting search for Epizyme, Inc., 2000-01-01 to 2023-12-31, multiple myeloma
+2024-10-16 14:35:01,983 - INFO - Query: AN:("Epizyme, Inc.") AND APD:[2000-01-01 TO 2023-12-31] AND ACLM:("multiple myeloma")
+2024-10-16 14:35:23,052 - WARNING - Attempt 1 failed: HTTPConnectionPool(host='patft.uspto.gov', port=80): Max retries exceeded with url: /netacgi/nph-Parser?Sect1=PTO2&Sect2=HITOFF&u=%2Fnetahtml%2FPTO%2Fsearch-adv.htm&r=0&p=1&f=S&l=50&Query=AN:(%22Epizyme,-Inc.%22)-AND-APD:%5B2000-01-01-TO-2023-12-31%5D-AND-ACLM:(%22multiple-myeloma%22)&d=PTXT (Caused by ConnectTimeoutError(<urllib3.connection.HTTPConnection object at 0x00000228F193DC70>, 'Connection to patft.uspto.gov timed out. (connect timeout=None)'))
+2024-10-16 14:35:23,052 - INFO - Retrying in 5 seconds...
+2024-10-16 14:35:49,089 - WARNING - Attempt 2 failed: HTTPConnectionPool(host='patft.uspto.gov', port=80): Max retries exceeded with url: /netacgi/nph-Parser?Sect1=PTO2&Sect2=HITOFF&u=%2Fnetahtml%2FPTO%2Fsearch-adv.htm&r=0&p=1&f=S&l=50&Query=AN:(%22Epizyme,-Inc.%22)-AND-APD:%5B2000-01-01-TO-2023-12-31%5D-AND-ACLM:(%22multiple-myeloma%22)&d=PTXT (Caused by ConnectTimeoutError(<urllib3.connection.HTTPConnection object at 0x00000228F193E750>, 'Connection to patft.uspto.gov timed out. (connect timeout=None)'))
+2024-10-16 14:35:49,089 - INFO - Retrying in 5 seconds...
+2024-10-16 14:36:15,128 - WARNING - Attempt 3 failed: HTTPConnectionPool(host='patft.uspto.gov', port=80): Max retries exceeded with url: /netacgi/nph-Parser?Sect1=PTO2&Sect2=HITOFF&u=%2Fnetahtml%2FPTO%2Fsearch-adv.htm&r=0&p=1&f=S&l=50&Query=AN:(%22Epizyme,-Inc.%22)-AND-APD:%5B2000-01-01-TO-2023-12-31%5D-AND-ACLM:(%22multiple-myeloma%22)&d=PTXT (Caused by ConnectTimeoutError(<urllib3.connection.HTTPConnection object at 0x00000228F16AFFB0>, 'Connection to patft.uspto.gov timed out. (connect timeout=None)'))
+2024-10-16 14:36:15,128 - ERROR - Max retries reached. Last error: HTTPConnectionPool(host='patft.uspto.gov', port=80): Max retries exceeded with url: /netacgi/nph-Parser?Sect1=PTO2&Sect2=HITOFF&u=%2Fnetahtml%2FPTO%2Fsearch-adv.htm&r=0&p=1&f=S&l=50&Query=AN:(%22Epizyme,-Inc.%22)-AND-APD:%5B2000-01-01-TO-2023-12-31%5D-AND-ACLM:(%22multiple-myeloma%22)&d=PTXT (Caused by ConnectTimeoutError(<urllib3.connection.HTTPConnection object at 0x00000228F16AFFB0>, 'Connection to patft.uspto.gov timed out. (connect timeout=None)'))
+2024-10-16 14:36:15,133 - INFO - Script completed
+2024-10-16 14:47:18,678 - INFO - Script started with parameters: Epizyme, Inc., 2015-01-01 to 2020-12-31, multiple myeloma
+2024-10-16 14:47:18,679 - INFO - Constructed query: {'applicantNameText': 'Epizyme, Inc.', 'filingDate': '[2015-01-01 TO 2020-12-31]', 'claimText': 'multiple myeloma'}
+2024-10-16 14:47:18,679 - INFO - Sending request to USPTO API with query: {'applicantNameText': 'Epizyme, Inc.', 'filingDate': '[2015-01-01 TO 2020-12-31]', 'claimText': 'multiple myeloma'}
+2024-10-16 14:47:18,718 - ERROR - Error fetching data from USPTO API: HTTPSConnectionPool(host='api.uspto.gov', port=443): Max retries exceeded with url: /patent/application?applicantNameText=Epizyme%2C+Inc.&filingDate=%5B2015-01-01+TO+2020-12-31%5D&claimText=multiple+myeloma (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x00000245AE734920>: Failed to resolve 'api.uspto.gov' ([Errno 11001] getaddrinfo failed)"))
+2024-10-16 14:47:18,718 - WARNING - No data found or invalid response
+2024-10-16 14:47:18,719 - INFO - Script completed
+2024-10-16 15:11:58,882 - INFO - Script started with parameters: Epizyme, 2015-01-01 to 2023-12-31, cancer
+2024-10-16 15:11:58,883 - INFO - Constructed query: {
+  "searchText": "firstNamedApplicant:(Epizyme) AND filingDate:[2015-01-01 TO 2023-12-31]",
+  "fq": [
+    "claimText:(cancer)"
+  ],
+  "fl": "*",
+  "mm": "100%",
+  "df": "patentTitle",
+  "facet": "false",
+  "sort": "filingDate desc",
+  "start": "0"
+}
+2024-10-16 15:11:58,883 - INFO - Sending request to USPTO PEDS API
+2024-10-16 15:11:59,427 - ERROR - Error fetching data from USPTO PEDS API: 404 Client Error:  for url: https://ped.uspto.gov/api/queries
+2024-10-16 15:11:59,429 - WARNING - No data found or invalid response
+2024-10-16 15:11:59,430 - INFO - Script completed

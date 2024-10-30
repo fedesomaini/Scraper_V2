@@ -19,29 +19,32 @@ print(f"First few rows:\n{data.head()}")
 print(f"Unique YEAR values: {data['YEAR'].unique()}")
 print(f"Unique SITE values: {data['SITE'].unique()}")
 
-def run_epi_scraper(condition, selected_sites):
+def run_epi_scraper(condition):
     """
-    Function to run the epidemiological scraper with the given condition and selected sites.
+    Function to run the epidemiological scraper with the given condition.
     :param condition: The condition for which to filter the data.
-    :param selected_sites: The list of selected sites from the main GUI.
     :return: A filtered and pivoted DataFrame with epidemiological data.
     """
-    print(f"Running Epi Scraper for condition: {condition} and sites: {selected_sites}")
+    print(f"Running Epi Scraper for condition: {condition}")
 
     # Get the current year
     current_year = datetime.now().year
     # Calculate the start year (10 years ago)
     start_year = current_year - 10
+    
+    # Convert condition to lowercase for case-insensitive matching
+    condition_lower = condition.lower().strip('"')
 
-    # Filter the data based on the selected sites and year range
+    # Filter the data based on the condition and year range
     filtered_data = data[
         (data['YEAR'] >= start_year) & 
         (data['YEAR'] <= current_year) & 
-        (data['SITE'].isin(selected_sites))
+        (data['SITE'].str.lower().str.contains(condition_lower))
     ]
 
     if filtered_data.empty:
-        print("No data found for the selected combination of years and sites.")
+        print("No data found for the selected condition and year range.")
+        print("Available sites:", data['SITE'].unique())  # Print available sites for debugging
         return pd.DataFrame()
 
     # Pivot the data to have SITE as rows and YEAR as columns
@@ -57,6 +60,6 @@ def run_epi_scraper(condition, selected_sites):
 
 if __name__ == "__main__":
     # For testing purposes
-    selected_sites = ["Liver", "Lung"]  # Example site selections passed from the main GUI
-    result = run_epi_scraper("Liver", selected_sites)
+    test_condition = "Head And Neck"
+    result = run_epi_scraper(test_condition)
     print(result)

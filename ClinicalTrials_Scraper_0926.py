@@ -108,13 +108,13 @@ def clinical_scraper(condition, start_year, statuses, interventions, phases):
     df = pd.DataFrame(sorted_data)
     
     # Create a file name based on the indication and current date
-    today = date.today().strftime("%Y%m%d")
-    file_name = f"{condition.replace(' ', '_')}_{today}.csv"
+    #today = date.today().strftime("%Y%m%d")
+    #file_name = f"{condition.replace(' ', '_')}_{today}.csv"
     
     # Save the DataFrame to a specific folder with the dynamic file name
-    output_path = r'C:\Webscraper\Scraper_V2\OutputSave' + '\\' + file_name
-    df.to_csv(output_path, index=False)
-    print(f"Data saved to {output_path}")
+    #output_path = r'C:\Webscraper\Scraper_V2\OutputSave' + '\\' + file_name
+    #df.to_csv(output_path, index=False)
+    #print(f"Data saved to {output_path}")
 
     return df
 
