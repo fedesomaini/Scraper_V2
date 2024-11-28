@@ -297,19 +297,24 @@ class ScraperGUI:
                                  pady=5,
                                  sticky="w")
 
-        #Sponsor Type 
-        ttk.Label(self.master, text="Sponsor Type(s):*").grid(row=5, column=0, padx=15, pady=20, sticky="w")
+       # Sponsor Type
+        ttk.Label(self.master, text="Sponsor Type(s):").grid(row=5, column=0, padx=15, pady=20, sticky="w")
         self.sponsor_frame = ttk.Frame(self.master)
         self.sponsor_frame.grid(row=5, column=1, padx=15, pady=20, sticky="w")
 
-        # Sponsor Types with mappings to API values
+        # Updated Sponsor Types with mappings to API values
         self.sponsor_vars = {
-        "Government": ["NIH", "FED", "OTHER_GOV"],  
-        "Industry": "INDUSTRY",
-        "Individual": "INDIV",
-        "Clinical Trial Network": "NETWORK",
-        "Other": ["OTHER", "AMBIG", "UNKNOWN"]
-        }
+        "Industry": ["INDUSTRY"],
+
+        # Testing individual queries
+        "NIH": ["NIH"],
+        "Federal": ["FED"],
+        
+        
+        
+        #"Government": ["NIH", "FED", "OTHER_GOV"],  
+        #"Other": ["INDIV", "AMBIG", "NETWORK", "OTHER"]  
+}
 
         self.sponsor_check_vars = {}
         for i, (label, api_value) in enumerate(self.sponsor_vars.items()):
