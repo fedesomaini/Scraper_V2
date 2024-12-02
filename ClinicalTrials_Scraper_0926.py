@@ -18,24 +18,20 @@ def clinical_scraper(condition, start_year, statuses, interventions, phases, spo
     else:
         phase_query = None
 
-    # Create the advanced filter query
+     # Create the advanced filter query
     advanced_filter = f'AREA[StartDate]RANGE[{start_year}-01-01,MAX]'
     if phase_query:
         advanced_filter += f' AND ({phase_query})'
 
-    
-    # Add sponsor_types to the advanced filter query
-    if sponsor_types:
+    if sponsor_types:  # Dynamically add selected sponsor types
         sponsor_query = ' OR '.join([f'AREA[LeadSponsorClass] {sponsor}' for sponsor in sponsor_types])
         advanced_filter += f' AND ({sponsor_query})'
-
 
     params = {
         'format': 'json',
         'query.cond': condition,
         'query.intr': intervention_query,
-        'query.spons': 'AREA[LeadSponsorClass] INDUSTRY',
-        'filter.advanced': advanced_filter,
+        'filter.advanced': advanced_filter,  # Dynamically include sponsors
         'filter.overallStatus': status_query,
         'fields': 'NCTId,BriefTitle,Acronym,OverallStatus,StartDate,PrimaryCompletionDate,CompletionDate,StudyFirstPostDate,LastUpdatePostDate,StudyType,Phase,EnrollmentCount,LeadSponsorName,LeadSponsorClass,Condition,InterventionName,LocationFacility,LocationCity,LocationCountry',
         'pageSize': 100,
@@ -103,6 +99,7 @@ def clinical_scraper(condition, start_year, statuses, interventions, phases, spo
             print(f"API request failed with status code: {response.status_code}")
             print(f"Response content: {response.text}")
             break
+        
 
     print(f"\nSummary:")
     print(f"Total studies matching criteria: {total_count}")

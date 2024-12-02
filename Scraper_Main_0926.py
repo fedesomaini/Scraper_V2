@@ -310,10 +310,8 @@ class ScraperGUI:
         "NIH": ["NIH"],
         "Federal": ["FED"],
         
-        
-        
-        #"Government": ["NIH", "FED", "OTHER_GOV"],  
-        #"Other": ["INDIV", "AMBIG", "NETWORK", "OTHER"]  
+        "Government": ["NIH", "FED", "OTHER_GOV"],  
+        "Other": ["INDIV", "AMBIG", "NETWORK", "OTHER"]  
 }
 
         self.sponsor_check_vars = {}
