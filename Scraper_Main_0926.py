@@ -305,11 +305,6 @@ class ScraperGUI:
         # Updated Sponsor Types with mappings to API values
         self.sponsor_vars = {
         "Industry": ["INDUSTRY"],
-
-        # Testing individual queries
-        "NIH": ["NIH"],
-        "Federal": ["FED"],
-        
         "Government": ["NIH", "FED", "OTHER_GOV"],  
         "Other": ["INDIV", "AMBIG", "NETWORK", "OTHER"]  
 }

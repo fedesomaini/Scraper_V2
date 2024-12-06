@@ -23,9 +23,15 @@ def clinical_scraper(condition, start_year, statuses, interventions, phases, spo
     if phase_query:
         advanced_filter += f' AND ({phase_query})'
 
-    if sponsor_types:  # Dynamically add selected sponsor types
+    ALL_SPONSOR_TYPES = ["NIH", "FED", "OTHER_GOV", "INDIV", "INDUSTRY", "NETWORK", "AMBIG", "OTHER", "UNKNOWN"]
+    
+    if not sponsor_types:
+        sponsor_types = ALL_SPONSOR_TYPES
+
+    if sponsor_types:
         sponsor_query = ' OR '.join([f'AREA[LeadSponsorClass] {sponsor}' for sponsor in sponsor_types])
-        advanced_filter += f' AND ({sponsor_query})'
+    advanced_filter += f' AND ({sponsor_query})'
+
 
     params = {
         'format': 'json',
