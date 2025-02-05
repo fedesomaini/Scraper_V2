@@ -3,7 +3,7 @@ import pandas as pd
 from datetime import datetime, date
 import time
 
-def clinical_scraper(condition, start_year, statuses, interventions, phases):
+def clinical_scraper(condition, start_year, statuses, interventions, phases, sponsor_types):
     base_url = 'https://clinicaltrials.gov/api/v2/studies'
     
     # Convert statuses to the format expected by the API
@@ -18,17 +18,26 @@ def clinical_scraper(condition, start_year, statuses, interventions, phases):
     else:
         phase_query = None
 
-    # Create the advanced filter query
+     # Create the advanced filter query
     advanced_filter = f'AREA[StartDate]RANGE[{start_year}-01-01,MAX]'
     if phase_query:
         advanced_filter += f' AND ({phase_query})'
+
+    ALL_SPONSOR_TYPES = ["NIH", "FED", "OTHER_GOV", "INDIV", "INDUSTRY", "NETWORK", "AMBIG", "OTHER", "UNKNOWN"]
+    
+    if not sponsor_types:
+        sponsor_types = ALL_SPONSOR_TYPES
+
+    if sponsor_types:
+        sponsor_query = ' OR '.join([f'AREA[LeadSponsorClass] {sponsor}' for sponsor in sponsor_types])
+    advanced_filter += f' AND ({sponsor_query})'
+
 
     params = {
         'format': 'json',
         'query.cond': condition,
         'query.intr': intervention_query,
-        'query.spons': 'AREA[LeadSponsorClass] INDUSTRY',
-        'filter.advanced': advanced_filter,
+        'filter.advanced': advanced_filter,  # Dynamically include sponsors
         'filter.overallStatus': status_query,
         'fields': 'NCTId,BriefTitle,Acronym,OverallStatus,StartDate,PrimaryCompletionDate,CompletionDate,StudyFirstPostDate,LastUpdatePostDate,StudyType,Phase,EnrollmentCount,LeadSponsorName,LeadSponsorClass,Condition,InterventionName,LocationFacility,LocationCity,LocationCountry',
         'pageSize': 100,
@@ -96,6 +105,7 @@ def clinical_scraper(condition, start_year, statuses, interventions, phases):
             print(f"API request failed with status code: {response.status_code}")
             print(f"Response content: {response.text}")
             break
+        
 
     print(f"\nSummary:")
     print(f"Total studies matching criteria: {total_count}")
