@@ -282,6 +282,8 @@ class ScraperGUI:
         "Other"  # Include "Other" as a selectable option
 ]
 
+#test
+
         # Define subsidiaries for expanded search
         self.company_subsidiaries = {
         "Novo Nordisk": ["Novo Nordisk Inc.", "Novo Nordisk A/S"],
