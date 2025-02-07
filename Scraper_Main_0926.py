@@ -14,7 +14,7 @@ class ScraperGUI:
     def __init__(self, master):
         self.master = master
         self.master.title("Eurus Input")
-        self.master.geometry("800x700")  # Increased size to accommodate new checkboxes
+        self.master.geometry("800x700") 
         self.conditions = [
             "All sites", 
             "Acute Myeloid Leukemias", 
@@ -261,41 +261,92 @@ class ScraperGUI:
                                                             padx=15,
                                                             pady=5,
                                                             sticky="w")
-        self.company_name_entry = ttk.Entry(self.master,
-                                             width=40)
-        self.company_name_entry.grid(row=7, 
-                                      column=1, 
-                                      padx=15, 
-                                      pady=5,
-                                      sticky="w")
         
-        #Patent Date Range Start Entry
-        ttk.Label(self.master, text="Earliest year for patent application:").grid(row=8,
-                                                                                  column=0,
-                                                                                  padx=15,
-                                                                                  pady=5,
-                                                                                  sticky="w")
-        self.patent_start_date_entry = ttk.Entry(self.master, 
-                                        width=40)
-        self.patent_start_date_entry.grid(row=8,
-                                 column=1,
-                                 padx=15,
-                                 pady=5,
-                                 sticky="w")
+        self.company_list = [
+        "Pfizer Inc.",
+        "Novartis AG",
+        "Genetech, Inc",
+        "Astellas Pharma Inc.",
+        "Alnylam Pharmaceuticals, Inc.",
+        "Eli Lilly and Company",
+        "Boehringer Ingelheim International GmbH",
+        "Novo Nordisk",
+        "Merck KGaA",
+        "AbbVie",
+        "Roche",
+        "AstraZeneca",
+        "Amgen Inc.",
+        "Sanofi",
+        "Bristol-Myers Squibb Company",
+        "Gilead Sciences",
+        "Other"  # Include "Other" as a selectable option
+]
+
+        # Define subsidiaries for expanded search
+        self.company_subsidiaries = {
+        "Novo Nordisk": ["Novo Nordisk Inc.", "Novo Nordisk A/S"],
+        "AbbVie": ["ABBVIE PRODUCTS LLC", "Abbvie Inc.", "Abbvie Biotechnology Ltd"],
+        "Roche": ["Roche Diagnostics GmbH", "ROCHE DIAGNOSTICS INTERNATIONAL AG",
+              "ROCHE DIAGNOSTICS OPERATIONS, INC.", "Roche Diabetes Care, INC.",
+              "Roche Diabetes Care GmbH"],
+        "AstraZeneca": ["AstraZeneca AB", "AstraZeneca UK Limited", "AstraZeneca Ireland Limited"],
+        "Sanofi": ["Sanofi", "Sanofi Biotechnology", "Sanofi-Aventis Deutschland GmbH"],
+        "Gilead Sciences": ["Gilead Sciences Ireland UC", "Gilead Sciences, Inc.", "Gilead Sciences Limited"]
+}
+       
+         # Create Dropdown
+        self.company_var = tk.StringVar()
+        self.company_dropdown = ttk.Combobox(self.master, textvariable=self.company_var, values=self.company_list, width=37)
+        self.company_dropdown.grid(row=7, column=1, padx=15, pady=5, sticky="w")
+        self.company_dropdown.set("Select a Company")  # Default selection
+
+        # Manual Entry Field (Initially Hidden)
+        self.company_name_entry = ttk.Entry(self.master, width=40)
+        self.company_name_entry.grid(row=8, column=1, padx=15, pady=5, sticky="w")
+        self.company_name_entry.grid_remove()  # Hide initially
+
+        # Function to Show Entry Field if "Other" is Selected
+        def show_custom_entry(event):
+            selected_company = self.company_var.get()
+
+            if selected_company == "Other":
+                self.company_name_entry.grid()  # Show text entry field
+                self.company_name_entry.delete(0, tk.END)  # Clear previous text
+                self.company_name_entry.focus()  # Set focus for immediate typing
+            else:
+                self.company_name_entry.grid_remove()  # Hide text entry field
+
+            self.master.update_idletasks()  # Force GUI refresh
+
+        # Bind Function to Dropdown Selection
+        self.company_dropdown.bind("<<ComboboxSelected>>", show_custom_entry)
+        def get_selected_company():
+            selected_company = self.company_var.get()
+
+            if selected_company == "Other":
+                return self.company_name_entry.get().strip()  # Get user-entered company
         
-        #Patent Date Range End Entry
-        ttk.Label(self.master, text="Latest year for patent application:").grid(row=9, 
-                                                                                column=0, 
-                                                                                padx=15, 
-                                                                                pady=5, 
-                                                                                sticky="w")
-        self.patent_end_date_entry = ttk.Entry(self.master, 
-                                        width=40)
-        self.patent_end_date_entry.grid(row=9, 
-                                 column=1, 
-                                 padx=15, 
-                                 pady=5,
-                                 sticky="w")
+            elif selected_company in self.company_subsidiaries:
+                
+                return self.company_subsidiaries[selected_company]  # Return subsidiaries
+            else:
+                return [selected_company]   
+       
+        #self.compan#y_name_entry = ttk.Entry(self.master,
+                                            # width=40)
+        #self.company_name_entry.grid(row=7, 
+                                    #  column=1, 
+                                     # padx=15, 
+                                      #pady=5,
+                                      #sticky="w")
+        #Patent Year Entries
+        ttk.Label(self.master, text="Earliest year for patent application:").grid(row=9, column=0, padx=15, pady=5, sticky="w")
+        self.patent_start_date_entry = ttk.Entry(self.master, width=40)
+        self.patent_start_date_entry.grid(row=9, column=1, padx=15, pady=5, sticky="w")
+
+        ttk.Label(self.master, text="Latest year for patent application:").grid(row=10, column=0, padx=15, pady=5, sticky="w")
+        self.patent_end_date_entry = ttk.Entry(self.master, width=40)
+        self.patent_end_date_entry.grid(row=10, column=1, padx=15, pady=5, sticky="w")
 
        # Sponsor Type
         ttk.Label(self.master, text="Sponsor Type(s):").grid(row=5, column=0, padx=15, pady=20, sticky="w")
@@ -317,9 +368,9 @@ class ScraperGUI:
 
         # Run Button
         run_button=(ttk.Button)(self.master, 
-                   text="Run Eurus", 
-                   command=self.run_scraper)
-        run_button.grid(row=10,
+                text="Run Eurus", 
+                command=self.run_scraper)
+        run_button.grid(row=11,
                         columnspan=2,
                         pady=20)
 
@@ -330,6 +381,16 @@ class ScraperGUI:
         patent_start_date = (self.patent_start_date_entry.get)()
         patent_end_date = (self.patent_end_date_entry.get)()
         fda_date = self.fda_date_entry.get() 
+    
+    #Capture company name properly
+        if self.company_var.get() == "Other":
+        
+            company_name = self.company_name_entry.get().strip()  # Use manual input
+        else:
+            company_name = self.company_var.get().strip() 
+
+    # Debugging - Print the captured company name to check if it's empty
+        print(f"DEBUG: Selected Company Name: '{company_name}'")
 
        # Retrieve and validate FDA Date
         fda_date = self.fda_date_entry.get()  # Retrieve the input
@@ -360,10 +421,6 @@ class ScraperGUI:
         phases = [phase for phase, var in self.phase_vars.items() if var.get()]
 
 
-    def run_scraper(self):
-        condition = '"' + self.condition_var.get().strip('"') + '"'
-        start_year = self.clinical_date_entry.get()
-        company_name = self.company_name_entry.get()
 
         # Get selected sponsor types 
         selected_sponsor_types = []
@@ -386,6 +443,9 @@ class ScraperGUI:
         if not all([condition, start_year, clinical_status, interventions, fda_date]):
             messagebox.showerror("Error", "Select fields must be filled")
             return
+        
+        #Debugging - Print final values before running scraper
+        print(f"DEBUG: Running scraper with company '{company_name}'")
 
         # Destroy the GUI window before running the scraper
         self.master.quit()  # Stop the tkinter main loop
@@ -470,7 +530,7 @@ def run_main_scraper(condition, start_year, clinical_status, interventions, fda_
 
     # Save all data to Excel
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    output_path = fr'C:\Webscraper\Scraper_V2\OutputSave\Save_{timestamp}.xlsx'
+    output_path = fr'C:\Users\DanielYuan\Desktop\Coding\Output\Save_{timestamp}.xlsx'
 
     try:
         with pd.ExcelWriter(output_path) as writer:
@@ -486,7 +546,7 @@ def run_main_scraper(condition, start_year, clinical_status, interventions, fda_
 
     except Exception as e:
         print(f"Error saving data to Excel: {e}")
-\
+
 
 if __name__ == "__main__":
     root = tk.Tk()
