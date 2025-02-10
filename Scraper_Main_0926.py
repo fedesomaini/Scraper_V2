@@ -2,6 +2,8 @@ import pandas as pd
 import tkinter as tk
 import requests
 import datetime
+import os
+import subprocess
 from io import StringIO
 from rapidfuzz import process, fuzz
 from tkinter import ttk, messagebox
@@ -9,6 +11,18 @@ from ClinicalTrials_Scraper_0926 import clinical_scraper
 from FDA_Scraper_0926 import fda_scraper
 from Epi_Scraper_0926 import run_epi_scraper
 from USPTO_Patent import fetch_all_results, process_patents
+
+def get_git_root():
+    try:
+        return subprocess.check_output(['git', 'rev-parse', '--show-toplevel'], universal_newlines=True).strip()
+    except subprocess.CalledProcessError:
+        return os.path.dirname(os.path.abspath(__file__))
+
+
+repo_root = get_git_root()
+output_dir = os.path.join(repo_root, "OutputSave")
+os.makedirs(output_dir, exist_ok=True)
+
 
 class ScraperGUI:
     def __init__(self, master):
@@ -470,6 +484,10 @@ def run_main_scraper(condition, start_year, clinical_status, interventions, fda_
     print(f"Patent Start Date: {patent_start_date}")
     print(f"Patent End Date: {patent_end_date}")
 
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    output_path = os.path.join(output_dir, f'Save_{timestamp}.xlsx')
+
+
     # Initialize empty DataFrames in case of exceptions
     clinical_df = pd.DataFrame()
     fda_df = pd.DataFrame()
@@ -530,24 +548,33 @@ def run_main_scraper(condition, start_year, clinical_status, interventions, fda_
     else:
         print("Company Name is blank. Skipping USPTO Patent Scraper.")
 
-    # Save all data to Excel
-    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    output_path = fr'C:\Users\DanielYuan\Desktop\Coding\Output\Save_{timestamp}.xlsx'
-
     try:
-        with pd.ExcelWriter(output_path) as writer:
-            if not clinical_df.empty:
-                clinical_df.to_excel(writer, sheet_name='Clinical Data', index=False)
-            if not fda_df.empty:
-                fda_df.to_excel(writer, sheet_name='FDA Data', index=False)
-            if not epi_df.empty:
-                epi_df.to_excel(writer, sheet_name='Epi Data', index=False)
-            if not uspto_df.empty:
-                uspto_df.to_excel(writer, sheet_name='USPTO Data', index=False)
-        print(f"Data saved to {output_path}")
-
+        if any(not df.empty for df in [clinical_df, fda_df, epi_df, uspto_df]):
+            with pd.ExcelWriter(output_path) as writer:
+                if not clinical_df.empty: clinical_df.to_excel(writer, sheet_name='Clinical Data', index=False)
+                if not fda_df.empty: fda_df.to_excel(writer, sheet_name='FDA Data', index=False)
+                if not epi_df.empty: epi_df.to_excel(writer, sheet_name='Epi Data', index=False)
+                if not uspto_df.empty: uspto_df.to_excel(writer, sheet_name='USPTO Data', index=False)
+            print(f"Data successfully saved to {output_path}")
+            git_commit_output(output_path)
+        else:
+            print("No data retrieved. Skipping file save.")
     except Exception as e:
         print(f"Error saving data to Excel: {e}")
+
+
+def git_commit_output(output_file):
+    if not os.path.exists(output_file):
+        print(f"File {output_file} does not exist. Skipping Git commit.")
+        return
+
+    try:
+        subprocess.run(["git", "add", output_file], check=True)
+        subprocess.run(["git", "commit", "-m", f"Auto-save results {os.path.basename(output_file)}"], check=True)
+        subprocess.run(["git", "push", "origin", "master"], check=True)
+        print("File committed and pushed to GitHub.")
+    except subprocess.CalledProcessError as e:
+        print(f"Git commit failed: {e}")
 
 
 if __name__ == "__main__":
