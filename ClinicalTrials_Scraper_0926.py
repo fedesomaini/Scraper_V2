@@ -3,7 +3,7 @@ import pandas as pd
 from datetime import datetime, date
 import time
 
-def clinical_scraper(condition, start_year, statuses, interventions, phases, sponsor_types):
+def clinical_scraper(condition, start_year, statuses, interventions, phases, sponsor_types, keyword=None):
     base_url = 'https://clinicaltrials.gov/api/v2/studies'
     
     # Convert statuses to the format expected by the API
@@ -30,7 +30,13 @@ def clinical_scraper(condition, start_year, statuses, interventions, phases, spo
 
     if sponsor_types:
         sponsor_query = ' OR '.join([f'AREA[LeadSponsorClass] {sponsor}' for sponsor in sponsor_types])
-    advanced_filter += f' AND ({sponsor_query})'
+        advanced_filter += f' AND ({sponsor_query})'
+
+    if keyword:
+        advanced_filter += (
+            f' AND (AREA[InterventionName] "{keyword}" OR AREA[InterventionDescription] "{keyword}")'
+        )
+
 
 
     params = {

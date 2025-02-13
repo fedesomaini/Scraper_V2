@@ -5,7 +5,9 @@ import json
 
 # USPTO API endpoint and key
 API_URL = "https://beta-api.uspto.gov/api/v1/patent/applications/search"
-API_KEY = "rfbxhcdrspofadpnczkvodzctckduc"
+API_KEY = "ehniyywcgsnyfkkgdtlinjimhpyuik"
+
+# Old API Key for old USPTO portal: "rfbxhcdrspofadpnczkvodzctckduc"
 
 # Headers for the API request
 headers = {

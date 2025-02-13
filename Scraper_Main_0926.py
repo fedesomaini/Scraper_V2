@@ -130,8 +130,8 @@ class ScraperGUI:
         self.create_widgets()
 
     def create_widgets(self):
-        # Indication
-        ttk.Label(self.master, text="Indication:*").grid(row=0, 
+        #Condition 
+        ttk.Label(self.master, text="Condition:*").grid(row=0, 
                                                         column=0, 
                                                         padx=15, 
                                                         pady=20, 
@@ -192,16 +192,11 @@ class ScraperGUI:
             self.status_vars[status] = var
 
         # Intervention Types
-        ttk.Label(self.master, text="Intervention Types:*").grid(row=3, 
-                                                                column=0, 
-                                                                padx=15, 
-                                                                pady=20, sticky="w")
+        ttk.Label(self.master, text="Intervention Types:*").grid(
+            row=3, column=0, padx=15, pady=20, sticky="w"
+        )
         self.intervention_frame = ttk.Frame(self.master)
-        self.intervention_frame.grid(row=3, 
-                                     column=1, 
-                                     padx=15, 
-                                     pady=20, 
-                                     sticky="w")
+        self.intervention_frame.grid(row=3,column=1, padx=15, pady=20, sticky="w")
 
         self.intervention_vars = {}
         interventions = [
@@ -217,15 +212,29 @@ class ScraperGUI:
             "RADIATION", 
             "OTHER"
         ]
+
         for i, intervention in enumerate(interventions):
             var = tk.BooleanVar()
-            ttk.Checkbutton(self.intervention_frame, 
-                            text=intervention, 
-                            variable=var).grid(row=i//3,
-                                               column=i%3,
-                                               sticky="w")
+            chk = ttk.Checkbutton(
+                self.intervention_frame, 
+                text=intervention, 
+                variable=var,
+                command=self.toggle_other_entry  # <-- reference the method
+            )
+            chk.grid(row=i//3, column=i%3, sticky="w")
             self.intervention_vars[intervention] = var
-        
+
+
+        # The text field for "OTHER" keyword
+        self.other_keyword_var = tk.StringVar() 
+        self.other_keyword_entry = ttk.Entry(
+        self.intervention_frame,  # <-- in the same frame
+        width=40,
+        textvariable=self.other_keyword_var
+        )
+        # Place it at row=3 (same as OTHER), but column=2 to be just to the right
+        self.other_keyword_entry.grid(row=3, column=2, padx=5, pady=5, sticky="w")
+        self.other_keyword_entry.grid_remove()
         # Phase selection
         ttk.Label(self.master, 
             text="Phase of clinical study:*").grid(row=4,
@@ -389,10 +398,25 @@ class ScraperGUI:
         run_button.grid(row=11,
                         columnspan=2,
                         pady=20)
+        
+
+    def toggle_other_entry(self):
+        """
+        Show/hide the text box if user selects 'OTHER' among interventions.
+        """
+        other_checked = self.intervention_vars["OTHER"].get()
+        if other_checked:
+            # Show the 'OTHER' text entry
+            self.other_keyword_entry.grid()
+        else:
+            # Hide it & clear its text
+            self.other_keyword_entry.grid_remove()
+            self.other_keyword_var.set("")
 
     def run_scraper(self):
         condition = '"' + self.condition_var.get().strip('"') + '"'
         start_year = self.clinical_date_entry.get()
+        interventions = [iv for iv, var in self.intervention_vars.items() if var.get()]
         company_name = (self.company_name_entry.get)()
         patent_start_date = (self.patent_start_date_entry.get)()
         patent_end_date = (self.patent_end_date_entry.get)()
@@ -466,11 +490,12 @@ class ScraperGUI:
         # Destroy the GUI window before running the scraper
         self.master.quit()  # Stop the tkinter main loop
         self.master.destroy()  # Close the GUI window
-
+        other_keyboard = self.other_keyword_var.get().strip()
+        print(f"DEBUG: The user typed for OTHER => '{other_keyboard}'")
         # Run the scraper with the collected inputs, including phases
-        run_main_scraper(condition, start_year, clinical_status, interventions, fda_date, phases, selected_sponsor_types, company_name, patent_start_date, patent_end_date)
+        run_main_scraper(condition, start_year, clinical_status, interventions, fda_date, phases, selected_sponsor_types, company_name, patent_start_date, patent_end_date, other_keyboard)
 
-def run_main_scraper(condition, start_year, clinical_status, interventions, fda_date, phases, selected_sponsor_types, company_name, patent_start_date, patent_end_date):
+def run_main_scraper(condition, start_year, clinical_status, interventions, fda_date, phases, selected_sponsor_types, company_name, patent_start_date, patent_end_date, other_keyboard):
     # Display inputs for debugging
     print(f"Running scraper with the following inputs:")
     print(f"Condition: {condition}")
@@ -497,13 +522,13 @@ def run_main_scraper(condition, start_year, clinical_status, interventions, fda_
     # Call the clinical trials scraper and store the result in a DataFrame
     try:
         print("Starting Clinical Trials Scraper...")
-        clinical_df = clinical_scraper(condition, start_year, clinical_status, interventions, phases, selected_sponsor_types)
+        clinical_df = clinical_scraper(condition, start_year, clinical_status, interventions, phases, selected_sponsor_types, keyword=other_keyboard)
         if not clinical_df.empty:
             print(f"Clinical Trials Data Retrieved: {clinical_df.shape[0]} records")
             clinical_df["Sponsor Information"] = clinical_df["Lead Sponsor"] + " (" + clinical_df["Lead Sponsor Type"] + ")"
             
-            clinical_df.to_excel(writer, sheet_name='Clinical Data', index=False)
-            print("Clinical Data saved with Sponsor Information.")
+           #clinical_df.to_excel(writer, sheet_name='Clinical Data', index=False)
+           #print("Clinical Data saved with Sponsor Information.")
 
         else:
             print("No clinical trials data found.")
@@ -548,33 +573,53 @@ def run_main_scraper(condition, start_year, clinical_status, interventions, fda_
     else:
         print("Company Name is blank. Skipping USPTO Patent Scraper.")
 
+     # Save all data to Excel
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    output_path = fr'C:\Users\DanielYuan\Desktop\Coding\Output\Save_{timestamp}.xlsx'
+
     try:
-        if any(not df.empty for df in [clinical_df, fda_df, epi_df, uspto_df]):
-            with pd.ExcelWriter(output_path) as writer:
-                if not clinical_df.empty: clinical_df.to_excel(writer, sheet_name='Clinical Data', index=False)
-                if not fda_df.empty: fda_df.to_excel(writer, sheet_name='FDA Data', index=False)
-                if not epi_df.empty: epi_df.to_excel(writer, sheet_name='Epi Data', index=False)
-                if not uspto_df.empty: uspto_df.to_excel(writer, sheet_name='USPTO Data', index=False)
-            print(f"Data successfully saved to {output_path}")
-            git_commit_output(output_path)
-        else:
-            print("No data retrieved. Skipping file save.")
+        with pd.ExcelWriter(output_path) as writer:
+            if not clinical_df.empty:
+                clinical_df.to_excel(writer, sheet_name='Clinical Data', index=False)
+            if not fda_df.empty:
+                fda_df.to_excel(writer, sheet_name='FDA Data', index=False)
+            if not epi_df.empty:
+                epi_df.to_excel(writer, sheet_name='Epi Data', index=False)
+            if not uspto_df.empty:
+                uspto_df.to_excel(writer, sheet_name='USPTO Data', index=False)
+        print(f"Data saved to {output_path}")
+
     except Exception as e:
         print(f"Error saving data to Excel: {e}")
 
 
-def git_commit_output(output_file):
-    if not os.path.exists(output_file):
-        print(f"File {output_file} does not exist. Skipping Git commit.")
-        return
+ #   try:
+  #      if any(not df.empty for df in [clinical_df, fda_df, epi_df, uspto_df]):
+   #         with pd.ExcelWriter(output_path) as writer:
+    #            if not clinical_df.empty: clinical_df.to_excel(writer, sheet_name='Clinical Data', index=False)
+     #           if not fda_df.empty: fda_df.to_excel(writer, sheet_name='FDA Data', index=False)
+      #          if not epi_df.empty: epi_df.to_excel(writer, sheet_name='Epi Data', index=False)
+       #         if not uspto_df.empty: uspto_df.to_excel(writer, sheet_name='USPTO Data', index=False)
+        #    print(f"Data successfully saved to {output_path}")
+#        #   git_commit_output(output_path)
+ #      else:
+  #         print("No data retrieved. Skipping file save.")
+   #except Exception as e:
+    #   print(f"Error saving data to Excel: {e}")
 
-    try:
-        subprocess.run(["git", "add", output_file], check=True)
-        subprocess.run(["git", "commit", "-m", f"Auto-save results {os.path.basename(output_file)}"], check=True)
-        subprocess.run(["git", "push", "origin", "master"], check=True)
-        print("File committed and pushed to GitHub.")
-    except subprocess.CalledProcessError as e:
-        print(f"Git commit failed: {e}")
+
+#def git_commit_output(output_file):
+ #   if not os.path.exists(output_file):
+  #      print(f"File {output_file} does not exist. Skipping Git commit.")
+   #     return
+
+#    try:
+ #       subprocess.run(["git", "add", output_file], check=True)
+  #      subprocess.run(["git", "commit", "-m", f"Auto-save results {os.path.basename(output_file)}"], check=True)
+   #     subprocess.run(["git", "push", "origin", "master"], check=True)
+    #    print("File committed and pushed to GitHub.")
+   # except subprocess.CalledProcessError as e:
+    #    print(f"Git commit failed: {e}")
 
 
 if __name__ == "__main__":
