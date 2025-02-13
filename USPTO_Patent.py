@@ -4,10 +4,10 @@ from google_patent_scraper import scraper_class
 import json
 
 # USPTO API endpoint and key
-API_URL = "https://beta-api.uspto.gov/api/v1/patent/applications/search"
+API_URL = "https://api.uspto.gov/api/v1/patent/applications/search"
 API_KEY = "ehniyywcgsnyfkkgdtlinjimhpyuik"
 
-# Old API Key for old USPTO portal: "rfbxhcdrspofadpnczkvodzctckduc"
+# Old API Key for old USPTO portal: "rfbxhcdrspofadpnczkvodzctckduc". With this key, we have a 1,200,000 patent file wrapper, old API URL: "https://beta-api.uspto.gov/api/v1/patent/applications/search"
 
 # Headers for the API request
 headers = {
